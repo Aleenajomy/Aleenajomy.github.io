@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
-import anime from "animejs";
+import { animate, stagger } from "animejs";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
@@ -390,12 +390,11 @@ function SectionHeading({ eyebrow, title, subtitle, icon: Icon }) {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          anime({
-            targets: lineRef.current,
+          animate(lineRef.current, {
             scaleX: [0, 1],
             opacity: [0, 1],
             duration: 700,
-            easing: "easeOutExpo",
+            ease: "outExpo",
           });
           observer.disconnect();
         }
@@ -462,13 +461,12 @@ function App() {
       .split("")
       .map((ch) => `<span style="display:inline-block;opacity:0">${ch === " " ? "&nbsp;" : ch}</span>`)
       .join("");
-    anime({
-      targets: ".anime-hero-title span",
+    animate(".anime-hero-title span", {
       opacity: [0, 1],
       translateY: [12, 0],
-      delay: anime.stagger(18, { start: 400 }),
+      delay: stagger(18, { start: 400 }),
       duration: 500,
-      easing: "easeOutExpo",
+      ease: "outExpo",
     });
   }, [reduceMotion]);
 
@@ -479,13 +477,12 @@ function App() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            anime({
-              targets: ".anime-skill-card",
+            animate(".anime-skill-card", {
               opacity: [0, 1],
               translateY: [24, 0],
-              delay: anime.stagger(60),
+              delay: stagger(60),
               duration: 550,
-              easing: "easeOutExpo",
+              ease: "outExpo",
             });
             observer.disconnect();
           }
