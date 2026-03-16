@@ -31,12 +31,11 @@ jobs:
           cache-dependency-path: yarn.lock
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: Build frontend
         run: yarn build
         env:
-          PUBLIC_URL: /
           REACT_APP_BACKEND_URL: ""
           ENABLE_HEALTH_CHECK: "false"
           ENABLE_VISUAL_EDITS: "false"
