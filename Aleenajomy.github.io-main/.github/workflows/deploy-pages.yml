@@ -28,12 +28,14 @@ jobs:
         with:
           node-version: 20
           cache: yarn
-          cache-dependency-path: yarn.lock
+          cache-dependency-path: Aleenajomy.github.io-main/yarn.lock
 
       - name: Install dependencies
+        working-directory: Aleenajomy.github.io-main
         run: yarn install --frozen-lockfile
 
       - name: Build frontend
+        working-directory: Aleenajomy.github.io-main
         run: yarn build
 
       - name: Setup Pages
@@ -42,7 +44,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: build
+          path: Aleenajomy.github.io-main/build
 
   deploy:
     needs: build
