@@ -457,15 +457,8 @@ function SectionHeading({ eyebrow, title, subtitle, icon: Icon }) {
 }
 
 function App() {
-  const [theme, setTheme] = useState("dark");
+  const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "dark");
   const reduceMotion = useReducedMotion();
-
-  useEffect(() => {
-    const storedTheme = localStorage.getItem("theme");
-    const initialTheme = storedTheme || "dark";
-    setTheme(initialTheme);
-    document.documentElement.classList.toggle("dark", initialTheme === "dark");
-  }, []);
 
   const toggleTheme = () => {
     const nextTheme = theme === "dark" ? "light" : "dark";
