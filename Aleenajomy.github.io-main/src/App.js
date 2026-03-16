@@ -1,4 +1,5 @@
-﻿import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
+import anime from "animejs";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
@@ -382,6 +383,29 @@ const getHoverLiftProps = (reduceMotion, lift = -4) =>
       };
 
 function SectionHeading({ eyebrow, title, subtitle, icon: Icon }) {
+  const lineRef = useRef(null);
+
+  useEffect(() => {
+    if (!lineRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          anime({
+            targets: lineRef.current,
+            scaleX: [0, 1],
+            opacity: [0, 1],
+            duration: 700,
+            easing: "easeOutExpo",
+          });
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(lineRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2">
@@ -398,7 +422,11 @@ function SectionHeading({ eyebrow, title, subtitle, icon: Icon }) {
       <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">
         {subtitle}
       </p>
-      <div className="mt-4 h-px w-full max-w-md bg-gradient-to-r from-primary/35 via-accent/35 to-transparent" />
+      <div
+        ref={lineRef}
+        style={{ transformOrigin: "left", opacity: 0, transform: "scaleX(0)" }}
+        className="mt-4 h-px w-full max-w-md bg-gradient-to-r from-primary/35 via-accent/35 to-transparent"
+      />
     </div>
   );
 }
@@ -424,6 +452,51 @@ function App() {
   const reveal = (delay = 0, distance = 16) => getRevealProps(reduceMotion, delay, distance);
   const hoverLift = (lift = -4) => getHoverLiftProps(reduceMotion, lift);
   const resumeDownloadUrl = `${process.env.PUBLIC_URL}/Aleena_Jomy_Resume.pdf`;
+
+  // anime.js: hero heading letter stagger
+  useEffect(() => {
+    const h1 = document.querySelector(".anime-hero-title");
+    if (!h1 || reduceMotion) return;
+    const text = h1.innerText;
+    h1.innerHTML = text
+      .split("")
+      .map((ch) => `<span style="display:inline-block;opacity:0">${ch === " " ? "&nbsp;" : ch}</span>`)
+      .join("");
+    anime({
+      targets: ".anime-hero-title span",
+      opacity: [0, 1],
+      translateY: [12, 0],
+      delay: anime.stagger(18, { start: 400 }),
+      duration: 500,
+      easing: "easeOutExpo",
+    });
+  }, [reduceMotion]);
+
+  // anime.js: skill cards staggered entrance
+  useEffect(() => {
+    if (reduceMotion) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            anime({
+              targets: ".anime-skill-card",
+              opacity: [0, 1],
+              translateY: [24, 0],
+              delay: anime.stagger(60),
+              duration: 550,
+              easing: "easeOutExpo",
+            });
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+    const section = document.querySelector("#skills");
+    if (section) observer.observe(section);
+    return () => observer.disconnect();
+  }, [reduceMotion]);
 
   return (
     <motion.div
@@ -527,7 +600,7 @@ function App() {
                 Backend-Focused Engineer Portfolio
               </motion.p>
               <motion.h1
-                className="mt-6 max-w-4xl text-3xl font-semibold tracking-tight text-foreground sm:text-5xl"
+                className="anime-hero-title mt-6 max-w-4xl text-3xl font-semibold tracking-tight text-foreground sm:text-5xl"
                 {...reveal(0.1, 12)}
               >
                 Hi, I&apos;m Aleena &mdash; Backend-Focused Full-Stack Developer
@@ -745,7 +818,8 @@ function App() {
             {skillGroups.map((group) => (
               <motion.article
                 key={group.category}
-                className="rounded-xl border border-accent/25 bg-card/95 p-5 shadow-sm shadow-primary/10"
+                className="anime-skill-card rounded-xl border border-accent/25 bg-card/95 p-5 shadow-sm shadow-primary/10"
+                style={{ opacity: 0 }}
                 {...hoverLift()}
               >
                 <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-foreground">
