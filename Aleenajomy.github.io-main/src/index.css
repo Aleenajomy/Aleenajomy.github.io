@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Light Mode — #F1F5F9 bg, #6D28D9 primary, #06B6D4 accent, #4F46E5 secondary, #0F172A text */
+  :root {
+    --background: 210 40% 96%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 263 69% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 245 76% 59%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 210 30% 90%;
+    --muted-foreground: 220 15% 40%;
+    --accent: 189 100% 43%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 72% 46%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 25% 82%;
+    --input: 214 25% 82%;
+    --ring: 189 100% 43%;
+    --radius: 0.6rem;
+    --bg-hex: #F1F5F9;
+    --star-color: 222 47% 20%;
+  }
+
+  /* Dark Mode — #020617 bg, #7C3AED primary, #22D3EE accent, #6366F1 secondary, #E2E8F0 text */
+  .dark {
+    --background: 222 84% 5%;
+    --foreground: 214 32% 91%;
+    --card: 222 60% 10%;
+    --card-foreground: 214 32% 91%;
+    --popover: 222 60% 10%;
+    --popover-foreground: 214 32% 91%;
+    --primary: 263 69% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 239 84% 67%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 222 50% 12%;
+    --muted-foreground: 215 20% 60%;
+    --accent: 188 91% 60%;
+    --accent-foreground: 222 84% 5%;
+    --destructive: 0 71% 53%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 222 40% 18%;
+    --input: 222 40% 18%;
+    --ring: 188 91% 60%;
+    --bg-hex: #020617;
+    --star-color: 0 0% 100%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    margin: 0;
+    font-family: "Inter", "Segoe UI", sans-serif;
+    line-height: 1.6;
+  }
+
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+
+::selection {
+  background: hsl(var(--accent) / 0.3);
+  color: hsl(var(--foreground));
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--accent) / 0.7);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--accent));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
