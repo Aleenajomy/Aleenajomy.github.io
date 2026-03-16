@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
-import { animate, stagger } from "animejs";
+import { animate, stagger, createTimeline, splitText } from "animejs";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
@@ -96,10 +96,15 @@ const skillGroups = [
     items: ["JWT Authentication", "RBAC", "Session Management"],
   },
   {
-    category: "Async & DevOps",
+    category: "Async",
     items: [
       "Celery (Basic)",
       "Redis (Basic)",
+    ],
+  },
+  {
+    category: "DevOps",
+    items: [
       "Docker (Learning)",
       "CI/CD Concepts",
       "Git",
@@ -108,13 +113,18 @@ const skillGroups = [
     ],
   },
   {
-    category: "Tools & Concepts",
+    category: "Tools",
     items: [
       "Postman",
       "LaTeX",
       "GitHub Copilot",
       "ChatGPT",
       "Amazon Q",
+    ],
+  },
+  {
+    category: "Concepts",
+    items: [
       "Agile",
       "SDLC",
       "MVC Architecture",
@@ -175,8 +185,10 @@ const skillCategoryIcons = {
   Backend: Code2,
   Databases: Database,
   "Auth & Security": Shield,
-  "Async & DevOps": GitBranch,
-  "Tools & Concepts": Wrench,
+  Async: Server,
+  DevOps: GitBranch,
+  Tools: Wrench,
+  Concepts: Layers,
 };
 
 const services = [
@@ -209,6 +221,12 @@ const services = [
     description:
       "Designing and optimizing data models using MySQL, PostgreSQL, and MongoDB for reliability and performance.",
     icon: Database,
+  },
+  {
+    title: "API Integration & Testing",
+    description:
+      "Connecting third-party services, writing integration workflows, and validating endpoints using Postman and automated test flows.",
+    icon: Link2,
   },
 ];
 
@@ -364,6 +382,14 @@ const profileHighlights = [
 
 const MOTION_EASE = [0.22, 1, 0.36, 1];
 
+const STARS = Array.from({ length: 80 }, () => ({
+  width:    Math.random() * 2.5 + 1.5,
+  top:      `${Math.random() * 100}%`,
+  left:     `${Math.random() * 100}%`,
+  duration: `${2 + Math.random() * 4}s`,
+  delay:    `-${Math.random() * 6}s`,
+}));
+
 const getRevealProps = (reduceMotion, delay = 0, distance = 16) =>
   reduceMotion
     ? {}
@@ -451,23 +477,21 @@ function App() {
   const reveal = (delay = 0, distance = 16) => getRevealProps(reduceMotion, delay, distance);
   const hoverLift = (lift = -4) => getHoverLiftProps(reduceMotion, lift);
   const resumeDownloadUrl = `${process.env.PUBLIC_URL}/Aleena_Jomy_Resume.pdf`;
+  const heroLine1Ref = useRef(null);
+  const heroLine3Ref = useRef(null);
 
-  // anime.js: hero heading letter stagger
   useEffect(() => {
-    const h1 = document.querySelector(".anime-hero-title");
-    if (!h1 || reduceMotion) return;
-    const text = h1.innerText;
-    h1.innerHTML = text
-      .split("")
-      .map((ch) => `<span style="display:inline-block;opacity:0">${ch === " " ? "&nbsp;" : ch}</span>`)
-      .join("");
-    animate(".anime-hero-title span", {
-      opacity: [0, 1],
-      translateY: [12, 0],
-      delay: stagger(18, { start: 400 }),
-      duration: 500,
-      ease: "outExpo",
-    });
+    if (reduceMotion || !heroLine1Ref.current || !heroLine3Ref.current) return;
+    const s1 = splitText(heroLine1Ref.current, { words: { wrap: 'clip' } });
+    const s3 = splitText(heroLine3Ref.current, { words: { wrap: 'clip' } });
+    createTimeline({
+      defaults: { ease: 'inOut(3)', duration: 650 },
+    })
+      .add([...s1.words, ...s3.words], {
+        y: [($el) => (+$el.dataset.line % 2 ? '100%' : '-100%'), '0%'],
+      }, stagger(125))
+      .init();
+    return () => { s1.revert(); s3.revert(); };
   }, [reduceMotion]);
 
   // anime.js: skill cards staggered entrance
@@ -496,20 +520,46 @@ function App() {
   }, [reduceMotion]);
 
   return (
-    <motion.div
-      className="App relative min-h-screen bg-background text-foreground"
-      {...(reduceMotion
-        ? {}
-        : {
-            initial: { opacity: 0 },
-            animate: { opacity: 1 },
-            transition: { duration: 0.3, ease: MOTION_EASE },
-          })}
-    >
+    <>
+      {/* Background — outside motion.div so it's always visible, no fade-in */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_22%,rgba(34,211,238,0.18),transparent_36%),radial-gradient(circle_at_78%_66%,rgba(59,130,246,0.16),transparent_42%),linear-gradient(180deg,rgba(244,249,255,1),rgba(233,241,252,1))] dark:bg-[radial-gradient(circle_at_20%_22%,rgba(34,211,238,0.16),transparent_34%),radial-gradient(circle_at_78%_66%,rgba(37,99,235,0.18),transparent_42%),linear-gradient(180deg,rgba(6,20,48,1),rgba(5,15,39,1))]"
-      />
+        className="pointer-events-none fixed inset-0 -z-10 bg-background"
+      >
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(ellipse at 70% 40%, rgba(124,58,237,0.18) 0%, transparent 55%),
+            radial-gradient(ellipse at 20% 80%, rgba(99,102,241,0.14) 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 100%, rgba(34,211,238,0.10) 0%, transparent 50%)`,
+        }} />
+        {STARS.map((star, i) => (
+          <span
+            key={i}
+            className="absolute rounded-full bg-foreground"
+            style={{
+              width: star.width,
+              height: star.width,
+              top: star.top,
+              left: star.left,
+              opacity: 0.5,
+              animation: `twinkle ${star.duration} ${star.delay} ease-in-out infinite`,
+            }}
+          />
+        ))}
+        <div className="absolute rounded-full blur-3xl pointer-events-none" style={{ width: 350, height: 350, top: '5%', left: '5%', background: 'rgba(124,58,237,0.15)', animation: 'orbFloat1 12s ease-in-out infinite alternate' }} />
+        <div className="absolute rounded-full blur-3xl pointer-events-none" style={{ width: 400, height: 400, top: '50%', left: '65%', background: 'rgba(99,102,241,0.13)', animation: 'orbFloat2 15s ease-in-out infinite alternate' }} />
+        <div className="absolute rounded-full blur-3xl pointer-events-none" style={{ width: 280, height: 280, top: '75%', left: '25%', background: 'rgba(34,211,238,0.10)', animation: 'orbFloat3 10s ease-in-out infinite alternate' }} />
+      </div>
+
+      <motion.div
+        className="App relative min-h-screen bg-transparent text-foreground"
+        {...(reduceMotion
+          ? {}
+          : {
+              initial: { opacity: 0 },
+              animate: { opacity: 1 },
+              transition: { duration: 0.3, ease: MOTION_EASE },
+            })}
+      >
 
       <a
         href="#main-content"
@@ -519,7 +569,7 @@ function App() {
       </a>
 
       <motion.header
-        className="sticky top-0 z-50 border-b border-border/80 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70"
+        className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur"
         {...(reduceMotion
           ? {}
           : {
@@ -587,189 +637,100 @@ function App() {
       </motion.header>
 
       <main id="main-content" className="mx-auto w-full max-w-6xl px-4 pb-16 pt-10 sm:px-6 lg:px-8">
-        <motion.section id="home" className="scroll-mt-28" {...reveal(0.05)}>
-          <div className="grid gap-8 lg:grid-cols-[1.4fr_0.9fr] lg:items-start">
+        <motion.section id="home" className="scroll-mt-28 min-h-[calc(100vh-80px)] flex items-center" {...reveal(0.05)}>
+          <div className="grid w-full gap-12 lg:grid-cols-2 lg:items-center">
+
+            {/* LEFT */}
             <div>
-              <motion.p
-                className="inline-flex rounded-full border border-border bg-card px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground"
-                {...reveal(0.07, 8)}
+              <h1
+                className="text-3xl font-bold text-foreground sm:text-4xl lg:text-5xl"
+                style={{ lineHeight: 1.2 }}
               >
-                Backend-Focused Engineer Portfolio
-              </motion.p>
-              <motion.h1
-                className="anime-hero-title mt-6 max-w-4xl text-3xl font-semibold tracking-tight text-foreground sm:text-5xl"
-                {...reveal(0.1, 12)}
-              >
-                Hi, I&apos;m Aleena &mdash; Backend-Focused Full-Stack Developer
-              </motion.h1>
-              <motion.p className="mt-5 max-w-3xl text-lg leading-8 text-muted-foreground" {...reveal(0.12, 12)}>
-                I build secure, scalable web applications using Django, React, and REST APIs.
-              </motion.p>
-              <motion.p className="mt-3 max-w-3xl text-base leading-7 text-muted-foreground" {...reveal(0.14, 12)}>
-                Focused on backend architecture, API design, and secure authentication workflows.
+                <span ref={heroLine1Ref} className="block">Hi, I&apos;m Aleena</span>
+                <motion.span
+                  className="block bg-gradient-to-r from-accent via-primary to-secondary bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(124,58,237,0.5)]"
+                  {...(reduceMotion ? {} : { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.65, delay: 0.4, ease: MOTION_EASE } })}
+                >Backend-Focused</motion.span>
+                <span ref={heroLine3Ref} className="block">Full-Stack Developer</span>
+              </h1>
+
+              <motion.p className="mt-6 max-w-lg text-base leading-7 text-muted-foreground" {...reveal(0.13, 12)}>
+                I build secure, scalable backend systems with Django, PostgreSQL and modern APIs.
               </motion.p>
 
               <motion.div className="mt-8 flex flex-wrap gap-3" {...reveal(0.16, 12)}>
                 <motion.a
                   href="#projects"
-                  className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
-                  {...(reduceMotion
-                    ? {}
-                    : {
-                        whileHover: { y: -2, scale: 1.01 },
-                        transition: { duration: 0.2, ease: MOTION_EASE },
-                      })}
+                  className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-foreground transition hover:opacity-90"
+                  {...(reduceMotion ? {} : { whileHover: { y: -2, scale: 1.02 }, transition: { duration: 0.2, ease: MOTION_EASE } })}
                 >
                   View Projects <ArrowRight size={15} />
                 </motion.a>
                 <motion.a
                   href={resumeDownloadUrl}
                   download
-                  className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition hover:border-accent/60"
-                  {...(reduceMotion
-                    ? {}
-                    : {
-                        whileHover: { y: -2, scale: 1.01 },
-                        transition: { duration: 0.2, ease: MOTION_EASE },
-                      })}
+                  className="inline-flex items-center gap-2 rounded-lg border border-border bg-card/60 px-5 py-2.5 text-sm font-semibold text-foreground transition hover:border-accent/60"
+                  {...(reduceMotion ? {} : { whileHover: { y: -2, scale: 1.02 }, transition: { duration: 0.2, ease: MOTION_EASE } })}
                 >
                   Download Resume <Download size={15} />
                 </motion.a>
-                <motion.a
-                  href="#contact"
-                  className="inline-flex items-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition hover:border-accent/60"
-                  {...(reduceMotion
-                    ? {}
-                    : {
-                        whileHover: { y: -2, scale: 1.01 },
-                        transition: { duration: 0.2, ease: MOTION_EASE },
-                      })}
-                >
-                  Contact Me
-                </motion.a>
               </motion.div>
 
-              <motion.ul className="mt-8 flex flex-wrap gap-2" {...reveal(0.18, 12)}>
-                {techTags.map((tag, index) => (
-                  <motion.li
-                    key={tag}
-                    className="rounded-md border border-border/80 bg-card px-2.5 py-1 text-xs font-medium text-muted-foreground"
-                    {...(reduceMotion
-                      ? {}
-                      : {
-                          initial: { opacity: 0, y: 8 },
-                          whileInView: { opacity: 1, y: 0 },
-                          viewport: { once: true, amount: 0.5 },
-                          transition: {
-                            duration: 0.35,
-                            delay: 0.2 + index * 0.03,
-                            ease: MOTION_EASE,
-                          },
-                        })}
-                  >
-                    {tag}
-                  </motion.li>
-                ))}
-              </motion.ul>
-
-              <div className="mt-10 grid gap-4 sm:grid-cols-3">
-                <motion.article
-                  className="rounded-xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-4"
-                  {...hoverLift()}
-                >
-                  <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">API Delivery</p>
-                  <p className="mt-2 text-2xl font-semibold text-foreground">15+</p>
-                  <p className="mt-2 text-sm text-muted-foreground">Production-style REST endpoints designed and integrated.</p>
-                </motion.article>
-                <motion.article
-                  className="rounded-xl border border-border bg-gradient-to-br from-accent/15 via-card to-card p-4"
-                  {...hoverLift()}
-                >
-                  <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Authentication</p>
-                  <p className="mt-2 text-2xl font-semibold text-foreground">JWT + RBAC</p>
-                  <p className="mt-2 text-sm text-muted-foreground">Role-based access and secure session handling workflows.</p>
-                </motion.article>
-                <motion.article
-                  className="rounded-xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-4"
-                  {...hoverLift()}
-                >
-                  <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Engineering Focus</p>
-                  <p className="mt-2 text-2xl font-semibold text-foreground">Backend First</p>
-                  <p className="mt-2 text-sm text-muted-foreground">Scalable logic, data integrity, and maintainable systems design.</p>
-                </motion.article>
-              </div>
             </div>
 
-            <motion.aside
-              className="rounded-2xl border border-border bg-card p-5 shadow-sm shadow-primary/5"
-              {...reveal(0.18, 20)}
-            >
-              <motion.div className="relative mx-auto w-fit" {...(reduceMotion ? {} : { animate: { y: [0, -2, 0] }, transition: { duration: 5, repeat: Infinity, ease: "easeInOut" } })}>
-                <div className="absolute -inset-2 rounded-full bg-gradient-to-br from-primary/20 via-accent/20 to-transparent blur-md" />
+            {/* RIGHT */}
+            <motion.div className="flex flex-col items-center gap-6" {...reveal(0.18, 20)}>
+              {/* profile */}
+              <motion.div
+                className="relative"
+                {...(reduceMotion ? {} : { animate: { y: [0, -6, 0] }, transition: { duration: 5, repeat: Infinity, ease: "easeInOut" } })}
+              >
+                {/* outer glow ring */}
+                <div className="absolute -inset-4 rounded-full bg-primary/20 blur-2xl" />
+                <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-accent/60 via-primary/40 to-transparent blur-md" />
                 <img
-                  src="/profile-photo.png"
+                  src={`${process.env.PUBLIC_URL}/profile-photo.png`}
                   alt="Aleena Jomy profile"
-                  className="relative h-40 w-40 rounded-full border-4 border-background object-cover shadow-lg shadow-primary/20 sm:h-44 sm:w-44"
+                  className="relative h-52 w-52 rounded-full border-4 border-accent/40 object-cover shadow-2xl sm:h-60 sm:w-60"
                   loading="eager"
                 />
-                <span className="absolute bottom-2 right-2 inline-flex h-5 w-5 rounded-full border-2 border-background bg-emerald-500" />
+                <span className="absolute bottom-3 right-3 inline-flex h-5 w-5 rounded-full border-2 border-background bg-emerald-400" />
               </motion.div>
 
-              <h2 className="mt-5 text-center text-xl font-semibold text-foreground">Aleena Jomy</h2>
-              <p className="mt-1 text-center text-sm text-muted-foreground">
-                Backend-Focused Full-Stack Developer
-              </p>
-
-              <div className="mt-4 rounded-lg border border-border/80 bg-background p-3">
-                <p className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                  <MapPin size={13} className="text-accent" />
-                  Portfolio Profile
-                </p>
-                <p className="mt-2 text-sm text-foreground">
-                  Systems-driven engineer focused on secure backend architecture.
-                </p>
+              <div className="text-center">
+                <h2 className="text-xl font-bold text-foreground">Aleena Jomy</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Backend-Focused Full-Stack Developer</p>
               </div>
 
-              <ul className="mt-4 space-y-3">
-                {profileHighlights.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <li key={item.label} className="rounded-lg border border-border/80 bg-background px-3 py-2">
-                      <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.13em] text-accent">
-                        <Icon size={13} />
-                        {item.label}
-                      </p>
-                      <p className="mt-1 text-sm text-muted-foreground">{item.value}</p>
-                    </li>
-                  );
-                })}
-              </ul>
-
-              <div className="mt-5 grid grid-cols-3 gap-2">
-                {contacts.map((contact) => {
-                  const Icon = contact.icon;
-                  return (
-                    <motion.a
-                      key={contact.label}
-                      href={contact.href}
-                      target={contact.label === "Email" ? "_self" : "_blank"}
-                      rel={contact.label === "Email" ? undefined : "noreferrer noopener"}
-                      className="inline-flex items-center justify-center rounded-md border border-border bg-background px-3 py-2 text-muted-foreground transition hover:border-accent/60 hover:text-accent"
-                      aria-label={contact.label}
-                      {...(reduceMotion
-                        ? {}
-                        : {
-                            whileHover: { y: -2, scale: 1.03 },
-                            whileTap: { scale: 0.98 },
-                            transition: { duration: 0.18, ease: MOTION_EASE },
-                          })}
-                    >
-                      <Icon size={16} />
-                    </motion.a>
-                  );
-                })}
+              {/* stat cards */}
+              <div className="grid w-full grid-cols-3 gap-3">
+                <motion.article
+                  className="flex flex-col items-center rounded-xl border border-accent/20 bg-card/70 p-4 text-center backdrop-blur"
+                  {...hoverLift()}
+                >
+                  <Server size={28} className="text-accent" />
+                  <p className="mt-2 text-2xl font-bold text-foreground">15+</p>
+                  <p className="mt-1 text-xs text-muted-foreground">APIs Built</p>
+                </motion.article>
+                <motion.article
+                  className="flex flex-col items-center rounded-xl border border-accent/20 bg-card/70 p-4 text-center backdrop-blur"
+                  {...hoverLift()}
+                >
+                  <Shield size={28} className="text-accent" />
+                  <p className="mt-2 text-sm font-bold leading-tight text-foreground">JWT &amp; RBAC</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Security</p>
+                </motion.article>
+                <motion.article
+                  className="flex flex-col items-center rounded-xl border border-accent/20 bg-card/70 p-4 text-center backdrop-blur"
+                  {...hoverLift()}
+                >
+                  <Layers size={28} className="text-accent" />
+                  <p className="mt-2 text-sm font-bold leading-tight text-foreground">Backend</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Architecture</p>
+                </motion.article>
               </div>
-            </motion.aside>
+            </motion.div>
+
           </div>
         </motion.section>
 
@@ -1043,7 +1004,7 @@ function App() {
         </motion.section>
       </main>
 
-      <motion.footer className="border-t border-border/80" {...reveal(0.02, 10)}>
+      <motion.footer className="border-t border-border" {...reveal(0.02, 10)}>
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <p>
             <span className="font-mono text-accent">&lt;AJ/&gt;</span> Aleena Jomy - Backend-Focused
@@ -1053,9 +1014,12 @@ function App() {
         </div>
       </motion.footer>
     </motion.div>
+    </>
   );
 }
 
 export default App;
+
+
 
 
