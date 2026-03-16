@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 214 45% 97%;
+    --foreground: 223 47% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 223 47% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 223 47% 12%;
+    --primary: 189 95% 47%;
+    --primary-foreground: 224 52% 10%;
+    --secondary: 214 34% 92%;
+    --secondary-foreground: 223 47% 12%;
+    --muted: 214 34% 92%;
+    --muted-foreground: 220 15% 38%;
+    --accent: 185 96% 61%;
+    --accent-foreground: 224 55% 10%;
+    --destructive: 0 72% 46%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 215 30% 84%;
+    --input: 215 30% 84%;
+    --ring: 185 96% 61%;
+    --radius: 0.6rem;
+  }
+
+  .dark {
+    --background: 225 63% 11%;
+    --foreground: 210 30% 91%;
+    --card: 223 41% 18%;
+    --card-foreground: 210 30% 91%;
+    --popover: 223 41% 18%;
+    --popover-foreground: 210 30% 91%;
+    --primary: 185 96% 63%;
+    --primary-foreground: 224 62% 11%;
+    --secondary: 223 38% 21%;
+    --secondary-foreground: 210 30% 91%;
+    --muted: 223 35% 17%;
+    --muted-foreground: 218 18% 68%;
+    --accent: 185 96% 63%;
+    --accent-foreground: 224 62% 11%;
+    --destructive: 0 71% 53%;
+    --destructive-foreground: 224 62% 11%;
+    --border: 221 34% 27%;
+    --input: 221 34% 27%;
+    --ring: 185 96% 63%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    margin: 0;
+    font-family: "Inter", "Segoe UI", sans-serif;
+    line-height: 1.6;
+  }
+
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+
+::selection {
+  background: hsl(var(--accent) / 0.3);
+  color: hsl(var(--foreground));
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--accent) / 0.7);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--accent));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
